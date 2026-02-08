@@ -153,7 +153,7 @@ async function fetchFromBovadaDirect(sport) {
     const data = await response.json();
     
     // Parse Bovada's response format
-    return parseBovedaResponse(data, sport);
+    return parseBovadaResponse(data, sport);
   } catch (error) {
     console.error(`  ↳ Bovada direct fetch error: ${error.message}`);
     return [];
@@ -166,13 +166,18 @@ async function fetchFromBovadaDirect(sport) {
  * @param {string} sport - Sport name
  * @returns {Array} Parsed events
  */
-function parseBovedaResponse(data, sport) {
+function parseBovadaResponse(data, sport) {
   const events = [];
 
   if (!Array.isArray(data)) return events;
 
   for (const group of data) {
     if (!group.events) continue;
+
+    // Get league info from path
+    const pathInfo = group.path || [];
+    const leaguePath = pathInfo.find(p => p.type === 'LEAGUE');
+    const tourPath = pathInfo.find(p => p.type === 'TOUR');
 
     for (const event of group.events) {
       const competitors = event.competitors || [];
@@ -182,16 +187,17 @@ function parseBovedaResponse(data, sport) {
       events.push({
         id: event.id,
         sport: sport,
-        league: group.description || event.path?.[1]?.description,
+        league: leaguePath?.description || tourPath?.description || group.description,
         description: event.description,
         displayName: event.description,
         participant1,
         participant2,
         startTime: event.startTime ? new Date(event.startTime).toISOString() : null,
-        link: event.link,
+        link: event.link, // Direct link from Bovada!
+        live: event.live || false,
         // Store for URL building
         _raw: event,
-        _path: event.path,
+        _path: pathInfo,
       });
     }
   }
