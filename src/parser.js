@@ -103,7 +103,11 @@ export function parsePickSimple(text) {
   let betType = 'ML';
   if (/\b(over|o)\s*\d/i.test(text)) betType = 'over';
   else if (/\b(under|u)\s*\d/i.test(text)) betType = 'under';
-  else if (/[+-]\d+\.5/.test(text) && !/[+-]\d{3}/.test(text)) betType = 'spread';
+  // Spread detection: look for point spreads like -7.5, +3.5 (with .5 usually)
+  // Exclude odds which are typically 3+ digits (like -110, +150)
+  else if (/[+-]\d+\.5\b/.test(text)) betType = 'spread';
+  // Also catch whole number spreads followed by odds (e.g., -7 -110)
+  else if (/[+-]\d{1,2}\s+[+-]\d{3}/.test(text)) betType = 'spread';
 
   // Extract player/team names (everything before the bet indicators)
   const nameMatch = text.match(/^([^+-]+?)(?:\s+(?:ml|moneyline|over|under|[+-]\d))/i);
