@@ -7,8 +7,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "test": "node --test src/**/*.test.js",
-    "test:watch": "node --test --watch src/**/*.test.js",
+    "test": "node --test ./src/*.test.js",
+    "test:watch": "node --test --watch ./src/*.test.js",
     "cli": "node src/cli.js",
     "demo": "node src/cli.js --mock --simple"
   },
