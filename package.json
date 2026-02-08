@@ -1,0 +1,24 @@
+{
+  "name": "bovada-bet-linker",
+  "version": "0.1.0",
+  "description": "Discord bot that parses betting picks and generates Bovada deep links",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test src/**/*.test.js",
+    "test:watch": "node --test --watch src/**/*.test.js"
+  },
+  "keywords": ["discord", "bot", "bovada", "betting", "sports"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "@anthropic-ai/sdk": "^0.27.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {}
+}
