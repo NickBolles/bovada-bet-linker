@@ -69,7 +69,8 @@ describe('findMatchingEventSimple', () => {
 
       const result = findMatchingEventSimple(pick, []);
 
-      assert.strictEqual(result, null);
+      assert.strictEqual(result.event, null);
+      assert.strictEqual(result.confidence, 0);
     });
 
     it('returns null for no player match', () => {

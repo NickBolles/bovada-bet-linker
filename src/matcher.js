@@ -8,38 +8,67 @@ import Anthropic from '@anthropic-ai/sdk';
  * @returns {Promise<Object|null>} Matched event or null
  */
 export async function findMatchingEvent(parsedPick, events, apiKey) {
+  const result = await findMatchingEventWithDebug(parsedPick, events, apiKey);
+  return result?.event || null;
+}
+
+/**
+ * Finds the best matching event with debug info
+ * @param {Object} parsedPick - The parsed pick data
+ * @param {Array} events - List of available events from Bovada
+ * @param {string} apiKey - Anthropic API key
+ * @returns {Promise<Object>} Result with event, confidence, and candidates
+ */
+export async function findMatchingEventWithDebug(parsedPick, events, apiKey) {
   if (!events || events.length === 0) {
-    return null;
+    return { event: null, confidence: 0, candidates: [] };
   }
 
+  // Get all candidates with scores
+  const simpleResult = findMatchingEventSimple(parsedPick, events);
+  const candidates = simpleResult?.allCandidates || [];
+  
   // First, try simple matching
-  const simpleMatch = findMatchingEventSimple(parsedPick, events);
-  if (simpleMatch && simpleMatch.confidence >= 0.5) {
+  if (simpleResult && simpleResult.confidence >= 0.5) {
     // Good enough match - use it directly
-    if (simpleMatch.confidence >= 0.7 || !apiKey) {
-      return simpleMatch.event;
+    if (simpleResult.confidence >= 0.7 || !apiKey) {
+      return {
+        event: simpleResult.event,
+        confidence: simpleResult.confidence,
+        candidates,
+      };
     }
   }
 
   // If simple matching is inconclusive and we have an API key, use LLM
   if (apiKey) {
     const llmMatch = await findMatchingEventLLM(parsedPick, events, apiKey);
-    if (llmMatch) return llmMatch;
+    if (llmMatch) {
+      return {
+        event: llmMatch,
+        confidence: 0.9, // LLM match assumed high confidence
+        candidates,
+      };
+    }
   }
 
   // Fall back to best simple match if we have one
-  if (simpleMatch && simpleMatch.confidence >= 0.3) {
-    return simpleMatch.event;
+  if (simpleResult && simpleResult.confidence >= 0.3) {
+    return {
+      event: simpleResult.event,
+      confidence: simpleResult.confidence,
+      candidates,
+    };
   }
 
-  return null;
+  return { event: null, confidence: 0, candidates };
 }
 
 /**
  * Simple matching without LLM - uses string matching
  * @param {Object} parsedPick - The parsed pick data
  * @param {Array} events - List of available events
- * @returns {Object|null} Match result with confidence score
+ * @returns {Object|null} Match result with confidence score and all candidates
  */
 export function findMatchingEventSimple(parsedPick, events) {
   const { players, sport, league } = parsedPick;
@@ -50,6 +79,7 @@ export function findMatchingEventSimple(parsedPick, events) {
 
   let bestMatch = null;
   let bestScore = 0;
+  const allCandidates = [];
 
   for (const event of events) {
     let score = 0;
@@ -118,20 +148,29 @@ export function findMatchingEventSimple(parsedPick, events) {
       }
     }
 
+    // Track all candidates with scores > 0
+    if (score > 0) {
+      allCandidates.push({ event, score });
+    }
+
     if (score > bestScore) {
       bestScore = score;
       bestMatch = event;
     }
   }
 
+  // Sort candidates by score descending
+  allCandidates.sort((a, b) => b.score - a.score);
+
   if (bestMatch) {
     return {
       event: bestMatch,
       confidence: Math.min(bestScore, 1.0),
+      allCandidates,
     };
   }
 
-  return null;
+  return { event: null, confidence: 0, allCandidates };
 }
 
 /**
