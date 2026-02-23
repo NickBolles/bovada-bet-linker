@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Environment files (don't bake secrets into image)
+.env
+.env.*
+!.env.example
+
+# Tests
+*.test.js
+coverage/
+
+# Development
+.github/
+*.md
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

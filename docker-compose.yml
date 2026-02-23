@@ -1,0 +1,17 @@
+services:
+  bovada-bot:
+    build: .
+    container_name: bovada-bet-linker
+    restart: unless-stopped
+    env_file:
+      - .env
+    # Or specify environment variables directly:
+    # environment:
+    #   - DISCORD_TOKEN=${DISCORD_TOKEN}
+    #   - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    #   - PICKS_CHANNEL_ID=${PICKS_CHANNEL_ID}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -75,6 +75,50 @@ src/
 └── urlBuilder.js   # URL construction
 ```
 
+## Docker Deployment
+
+### Quick Start
+
+```bash
+# Clone the repo
+git clone https://github.com/NickBolles/bovada-bet-linker.git
+cd bovada-bet-linker
+
+# Create your .env file
+cp .env.example .env
+nano .env  # Add your tokens
+
+# Build and run
+docker compose up -d
+
+# View logs
+docker compose logs -f
+```
+
+### Manual Docker Commands
+
+```bash
+# Build the image
+docker build -t bovada-bet-linker .
+
+# Run the container
+docker run -d \
+  --name bovada-bot \
+  --restart unless-stopped \
+  -e DISCORD_TOKEN=your_token \
+  -e ANTHROPIC_API_KEY=your_key \
+  -e PICKS_CHANNEL_ID=your_channel_id \
+  bovada-bet-linker
+```
+
+### Updating
+
+```bash
+git pull
+docker compose build
+docker compose up -d
+```
+
 ## Development
 
 ```bash
