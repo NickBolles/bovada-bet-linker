@@ -77,7 +77,30 @@ src/
 
 ## Docker Deployment
 
-### Quick Start
+### Quick Start (Pre-built Image)
+
+```bash
+# Create a directory and .env file
+mkdir bovada-bot && cd bovada-bot
+
+cat > .env << 'EOF'
+DISCORD_TOKEN=your_bot_token
+ANTHROPIC_API_KEY=your_anthropic_key
+PICKS_CHANNEL_ID=your_channel_id
+EOF
+
+# Run the pre-built image
+docker run -d \
+  --name bovada-bot \
+  --restart unless-stopped \
+  --env-file .env \
+  ghcr.io/nickbolles/bovada-bet-linker:latest
+
+# View logs
+docker logs -f bovada-bot
+```
+
+### Build From Source
 
 ```bash
 # Clone the repo

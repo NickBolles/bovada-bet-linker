@@ -1,0 +1,15 @@
+# Use this file to run the pre-built image from GitHub Container Registry
+# docker compose -f docker-compose.ghcr.yml up -d
+
+services:
+  bovada-bot:
+    image: ghcr.io/nickbolles/bovada-bet-linker:latest
+    container_name: bovada-bet-linker
+    restart: unless-stopped
+    env_file:
+      - .env
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
