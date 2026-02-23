@@ -14,12 +14,25 @@ export async function findMatchingEvent(parsedPick, events, apiKey) {
 
   // First, try simple matching
   const simpleMatch = findMatchingEventSimple(parsedPick, events);
-  if (simpleMatch && simpleMatch.confidence > 0.8) {
+  if (simpleMatch && simpleMatch.confidence >= 0.5) {
+    // Good enough match - use it directly
+    if (simpleMatch.confidence >= 0.7 || !apiKey) {
+      return simpleMatch.event;
+    }
+  }
+
+  // If simple matching is inconclusive and we have an API key, use LLM
+  if (apiKey) {
+    const llmMatch = await findMatchingEventLLM(parsedPick, events, apiKey);
+    if (llmMatch) return llmMatch;
+  }
+
+  // Fall back to best simple match if we have one
+  if (simpleMatch && simpleMatch.confidence >= 0.3) {
     return simpleMatch.event;
   }
 
-  // If simple matching is inconclusive, use LLM
-  return await findMatchingEventLLM(parsedPick, events, apiKey);
+  return null;
 }
 
 /**
@@ -67,17 +80,38 @@ export function findMatchingEventSimple(parsedPick, events) {
         event.displayName,
       ].filter(Boolean).map(p => normalizePlayerName(p));
 
+      let playerMatched = false;
       for (const participant of participants) {
-        if (participant.includes(normalizedPlayer)) {
-          score += 0.5;
+        if (playerMatched) break;
+        
+        // Exact full name match
+        if (participant === normalizedPlayer) {
+          score += 0.7;
+          playerMatched = true;
           break;
         }
+        
+        // Player name is contained in participant (e.g., "pegula" in "jessica pegula")
+        if (participant.includes(normalizedPlayer) && normalizedPlayer.length >= 3) {
+          score += 0.6;
+          playerMatched = true;
+          break;
+        }
+        
+        // Participant name is contained in player (e.g., "jessica pegula" starts with "jessica")
+        if (normalizedPlayer.includes(participant) && participant.length >= 3) {
+          score += 0.5;
+          playerMatched = true;
+          break;
+        }
+        
         // Partial match (last name match)
         const playerParts = normalizedPlayer.split(' ');
         const participantParts = participant.split(' ');
         for (const part of playerParts) {
-          if (part.length > 2 && participantParts.some(pp => pp.includes(part))) {
-            score += 0.3;
+          if (part.length > 2 && participantParts.some(pp => pp === part || pp.includes(part))) {
+            score += 0.4;
+            playerMatched = true;
             break;
           }
         }
