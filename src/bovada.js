@@ -114,7 +114,7 @@ async function fetchFromOddsAPI(sport) {
 
 /**
  * Fetches events by scraping Bovada directly
- * @param {string} sport - Sport to fetch
+ * @param {string} sport - Sport to fetch (null = fetch all sports)
  * @returns {Promise<Array>} Events
  */
 async function fetchFromBovadaDirect(sport) {
@@ -131,7 +131,17 @@ async function fetchFromBovadaDirect(sport) {
     mma: '/services/sports/event/coupon/events/A/description/ufc-mma',
   };
 
-  const path = sport ? sportPaths[sport.toLowerCase()] : null;
+  // If no sport specified, fetch all sports in parallel
+  if (!sport) {
+    console.log('  ↳ Fetching all sports from Bovada...');
+    const allSports = Object.keys(sportPaths);
+    const results = await Promise.all(
+      allSports.map(s => fetchFromBovadaDirect(s).catch(() => []))
+    );
+    return results.flat();
+  }
+
+  const path = sportPaths[sport.toLowerCase()];
   if (!path) {
     return [];
   }
