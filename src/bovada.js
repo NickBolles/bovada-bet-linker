@@ -147,16 +147,22 @@ async function fetchFromBovadaDirect(sport) {
   }
 
   try {
-    const url = `https://www.bovada.lv${path}?marketFilterId=def&pre498=true&lang=en`;
+    const url = `https://www.bovada.lv${path}?marketFilterId=def&preMatchOnly=true&lang=en`;
+    console.log(`  ↳ Fetching: ${url}`);
+    
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Origin': 'https://www.bovada.lv',
+        'Referer': 'https://www.bovada.lv/sports/tennis',
       },
     });
 
     if (!response.ok) {
-      console.error(`  ↳ Bovada direct fetch error: ${response.status}`);
+      console.error(`  ↳ Bovada direct fetch error: ${response.status} for ${sport}`);
+      console.error(`  ↳ URL: ${url}`);
       return [];
     }
 
@@ -236,6 +242,28 @@ export function getMockEvents(sport) {
       },
       {
         id: 'mock-tennis-2',
+        sport: 'tennis',
+        league: 'WTA Austin',
+        description: 'Jessica Pegula vs Rebecca Sramkova',
+        displayName: 'Pegula vs Sramkova',
+        participant1: 'Jessica Pegula',
+        participant2: 'Rebecca Sramkova',
+        startTime: new Date(Date.now() + 86400000).toISOString(),
+        link: '/sports/tennis/wta/austin/jessica-pegula-rebecca-sramkova-202602241100',
+      },
+      {
+        id: 'mock-tennis-3',
+        sport: 'tennis',
+        league: 'ATP Acapulco',
+        description: 'Sebastian Korda vs Mattia Bellucci',
+        displayName: 'Korda vs Bellucci',
+        participant1: 'Sebastian Korda',
+        participant2: 'Mattia Bellucci',
+        startTime: new Date(Date.now() + 86400000).toISOString(),
+        link: '/sports/tennis/atp/acapulco/sebastian-korda-mattia-bellucci-202602241100',
+      },
+      {
+        id: 'mock-tennis-4',
         sport: 'tennis',
         league: 'Davis Cup',
         description: 'Escobar/Hidalgo vs Hijikata/Thompson',

@@ -54,8 +54,14 @@ Respond with JSON only:`;
       return null;
     }
 
-    // Parse the JSON response
-    const jsonStr = content.text.trim();
+    // Parse the JSON response (strip markdown code blocks if present)
+    let jsonStr = content.text.trim();
+    
+    // Remove markdown code blocks if the model wrapped the response
+    if (jsonStr.startsWith('```')) {
+      jsonStr = jsonStr.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
+    }
+    
     const parsed = JSON.parse(jsonStr);
 
     return parsed;
