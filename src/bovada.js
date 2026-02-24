@@ -40,10 +40,9 @@ export async function fetchBovadaEvents(sport) {
     events = await fetchFromBovadaDirect(sport);
   }
 
-  // Option 3: Fall back to mock data for development
+  // No mock data - require real data
   if (events.length === 0) {
-    console.log('  ↳ Using mock event data (configure ODDS_API_KEY for live data)');
-    events = getMockEvents(sport);
+    console.log('  ↳ No events found from Bovada API');
   }
 
   // Cache the results
@@ -147,16 +146,14 @@ async function fetchFromBovadaDirect(sport) {
   }
 
   try {
-    const url = `https://www.bovada.lv${path}?marketFilterId=def&preMatchOnly=true&lang=en`;
+    // Simple URL without extra params - matches working curl
+    const url = `https://www.bovada.lv${path}`;
     console.log(`  ↳ Fetching: ${url}`);
     
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Origin': 'https://www.bovada.lv',
-        'Referer': 'https://www.bovada.lv/sports/tennis',
+        'User-Agent': 'Mozilla/5.0',
+        'Accept': 'application/json',
       },
     });
 
